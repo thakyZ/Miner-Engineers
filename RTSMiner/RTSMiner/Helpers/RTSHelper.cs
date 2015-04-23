@@ -15,7 +15,6 @@ namespace RTSMiner.Helpers
 			/// <summary>
 			/// The amount of Uranium in the player's inventory.
 			/// </summary>
-<<<<<<< HEAD
 			public int Uranium;
 			/// <summary>
 			/// The amount of Stone in the player's inventory.
