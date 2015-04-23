@@ -15,6 +15,7 @@ namespace RTSMiner.Helpers
 			/// <summary>
 			/// The amount of Uranium in the player's inventory.
 			/// </summary>
+<<<<<<< HEAD
 			public int Uranium;
 			/// <summary>
 			/// The amount of Stone in the player's inventory.
@@ -36,6 +37,21 @@ namespace RTSMiner.Helpers
 				Iron = InitIron;
 				Gold = InitGold;
 			}
+=======
+			public int Uranium = 1000;
+			/// <summary>
+			/// The amount of Stone in the player's inventory.
+			/// </summary>
+			public int Stone = 0;
+			/// <summary>
+			/// The amount of Iron in the player's inventory.
+			/// </summary>
+			public int Iron = 0;
+			/// <summary>
+			/// The amount of Gold in the player's ineventory.
+			/// </summary>
+			public int Gold = 0;
+>>>>>>> master
 		}
 		
 		/// <summary>
@@ -99,7 +115,11 @@ namespace RTSMiner.Helpers
 		/// </summary>
 		/// <param name="a">The array to flip</summary>
 		/// <returns>Returns the array fliped on it's 'z'/'w' axis</returns>
+<<<<<<< HEAD
 		public static int[,] TransposeArray(int[,] a)
+=======
+		public int[,] TransposeArray(int[,] a)
+>>>>>>> master
 		{
 			int[,] b = new int[a.GetLength(1), a.GetLength(0)];
 

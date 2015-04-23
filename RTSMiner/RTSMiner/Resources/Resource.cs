@@ -16,6 +16,7 @@ namespace RTSMiner.Resources
 {
 	public class Resource : Sprite
 	{
+<<<<<<< HEAD
 		public int MainHP
 		{
 			get;
@@ -33,12 +34,25 @@ namespace RTSMiner.Resources
 		protected Point WorldSize;
 
 		public Resource(Vector2 position, Texture2D texture, Point worldSize, List<Resource> ResourceList)
+=======
+		public int MainHP;
+		public bool Breakable;
+		public int GridSize;
+		public RTSHelper.ResourceTypes ResourceType;
+		public List<Resource> ResourceList;
+		public Rectangle BoundingCollisions;
+
+		public Resource(Vector2 position, Texture2D texture, List<Resource> ResourceList)
+>>>>>>> master
 			: base(position, Color.White, texture)
 		{
 			this.ResourceList = ResourceList;
 
+<<<<<<< HEAD
 			this.WorldSize = worldSize;
 
+=======
+>>>>>>> master
 			BoundingCollisions = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
 		}
 
@@ -140,7 +154,11 @@ namespace RTSMiner.Resources
 		{
 			foreach(Resource r in ResourceList)
 			{
+<<<<<<< HEAD
 				if (r.Position.Y == Position.Y - GridSize && r.Position.X == Position.X || Position.Y == 0)
+=======
+				if (r.Position.Y == Position.Y - GridSize && r.Position.X == Position.X)
+>>>>>>> master
 				{
 					return true;
 				}
@@ -153,7 +171,11 @@ namespace RTSMiner.Resources
 		{
 			foreach (Resource r in ResourceList)
 			{
+<<<<<<< HEAD
 				if (r.Position.X == Position.X + GridSize && r.Position.Y == Position.Y || Position.X + GridSize == WorldSize.X)
+=======
+				if (r.Position.X == Position.X + GridSize && r.Position.Y == Position.Y)
+>>>>>>> master
 				{
 					return true;
 				}
@@ -166,7 +188,11 @@ namespace RTSMiner.Resources
 		{
 			foreach (Resource r in ResourceList)
 			{
+<<<<<<< HEAD
 				if (r.Position.X == Position.X - GridSize && r.Position.Y == Position.Y || Position.X == 0)
+=======
+				if (r.Position.X == Position.X - GridSize && r.Position.Y == Position.Y)
+>>>>>>> master
 				{
 					return true;
 				}
@@ -179,7 +205,11 @@ namespace RTSMiner.Resources
 		{
 			foreach (Resource r in ResourceList)
 			{
+<<<<<<< HEAD
 				if (r.Position.Y == Position.Y + GridSize && r.Position.X == Position.X || Position.Y + GridSize == WorldSize.Y)
+=======
+				if (r.Position.Y == Position.Y + GridSize && r.Position.X == Position.X)
+>>>>>>> master
 				{
 					return true;
 				}
