@@ -279,5 +279,5 @@ POSSIBILITY OF SUCH DAMAGES.
 
                      END OF TERMS AND CONDITIONS
 
-    RTS Miner Engineers
+    RTS Miner Engineers   
     Copyright (C) 2015  Nire Inicana
