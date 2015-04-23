@@ -16,8 +16,8 @@ namespace RTSMiner.Resources
 {
 	public class StoneResource : Resource
 	{
-		public StoneResource(Vector2 position, Texture2D texture, int hp, List<Resource> ResourceList)
-			: base(position, texture, ResourceList)
+		public StoneResource(Vector2 position, Texture2D texture, int hp, Point worldSize, List<Resource> ResourceList)
+			: base(position, texture, worldSize, ResourceList)
 		{
 			GridSize = 30;
 			AddAnimations(texture);

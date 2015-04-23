@@ -16,17 +16,28 @@ namespace RTSMiner.Resources
 {
 	public class Resource : Sprite
 	{
-		public int MainHP;
-		public bool Breakable;
-		public int GridSize;
+		public int MainHP
+		{
+			get;
+			protected set;
+		}
+		public bool Breakable
+		{
+			get;
+			protected set;
+		}
+		protected int GridSize;
 		public RTSHelper.ResourceTypes ResourceType;
-		public List<Resource> ResourceList;
+		protected List<Resource> ResourceList;
 		public Rectangle BoundingCollisions;
+		protected Point WorldSize;
 
-		public Resource(Vector2 position, Texture2D texture, List<Resource> ResourceList)
+		public Resource(Vector2 position, Texture2D texture, Point worldSize, List<Resource> ResourceList)
 			: base(position, Color.White, texture)
 		{
 			this.ResourceList = ResourceList;
+
+			this.WorldSize = worldSize;
 
 			BoundingCollisions = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
 		}
@@ -129,7 +140,7 @@ namespace RTSMiner.Resources
 		{
 			foreach(Resource r in ResourceList)
 			{
-				if (r.Position.Y == Position.Y - GridSize && r.Position.X == Position.X)
+				if (r.Position.Y == Position.Y - GridSize && r.Position.X == Position.X || Position.Y == 0)
 				{
 					return true;
 				}
@@ -142,7 +153,7 @@ namespace RTSMiner.Resources
 		{
 			foreach (Resource r in ResourceList)
 			{
-				if (r.Position.X == Position.X + GridSize && r.Position.Y == Position.Y)
+				if (r.Position.X == Position.X + GridSize && r.Position.Y == Position.Y || Position.X + GridSize == WorldSize.X)
 				{
 					return true;
 				}
@@ -155,7 +166,7 @@ namespace RTSMiner.Resources
 		{
 			foreach (Resource r in ResourceList)
 			{
-				if (r.Position.X == Position.X - GridSize && r.Position.Y == Position.Y)
+				if (r.Position.X == Position.X - GridSize && r.Position.Y == Position.Y || Position.X == 0)
 				{
 					return true;
 				}
@@ -168,7 +179,7 @@ namespace RTSMiner.Resources
 		{
 			foreach (Resource r in ResourceList)
 			{
-				if (r.Position.Y == Position.Y + GridSize && r.Position.X == Position.X)
+				if (r.Position.Y == Position.Y + GridSize && r.Position.X == Position.X || Position.Y + GridSize == WorldSize.Y)
 				{
 					return true;
 				}

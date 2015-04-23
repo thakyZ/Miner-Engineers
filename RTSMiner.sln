@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual C# Express 2010
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSMiner", "RTSMiner\RTSMiner\RTSMiner.csproj", "{79C34645-8F71-46A9-80B4-B3CB0986E93F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSMinerContent", "RTSMiner\RTSMinerContent\RTSMinerContent.contentproj", "{D1FDA125-516E-4933-B09A-F5DF083F0418}"

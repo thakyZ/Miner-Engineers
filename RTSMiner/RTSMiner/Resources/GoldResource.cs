@@ -16,8 +16,8 @@ namespace RTSMiner.Resources
 {
 	public class GoldResource : Resource
 	{
-		public GoldResource(Vector2 position, Texture2D texture, int hp, List<Resource> ResourceList)
-			: base(position, texture, ResourceList)
+		public GoldResource(Vector2 position, Texture2D texture, int hp, Point worldSize, List<Resource> ResourceList)
+			: base(position, texture, worldSize, ResourceList)
 		{
 			GridSize = 30;
 			AddAnimations(texture);

@@ -159,70 +159,8 @@ namespace RTSMiner.Managers
 			spriteBatch = new SpriteBatch(myGame.GraphicsDevice);
 			// Load all the images.
 			LoadImages();
-			// Create the map
-			MapArray = MapGenerator.SaveMap(MapGenerator.CreateMap(100, 100, 10, 0.03f), 3);
-			// Create the unit map.
-			int[,] UnitArray = Maps.Level1UnitMapGen();
-			
-			// Calculate out the map.
-			for (int x = 0; x < MapArray.GetLength(0); x++)
-			{
-				for (int y = 0; y < MapArray.GetLength(1); y++)
-				{
-					switch (MapArray[x, y])
-					{
-						case -1: // "Water"
-							break;
-						case 0: // "Ground" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							break;
-						case 1: // "Cliff" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new StoneResource(new Vector2(x * 30, y * 30), stoneTile, 10, ResourceList));
-							break;
-						case 2: // "Uranium" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new UraniumResource(new Vector2(x * 30, y * 30), uraniumTile, 15, ResourceList));
-							break;
-						case 3: // "Iron" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new IronResource(new Vector2(x * 30, y * 30), ironTile, 15, ResourceList));
-							break;
-						case 4: // "Gold" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new GoldResource(new Vector2(x * 30, y * 30), goldTile, 15, ResourceList));
-							break;
-						case 5: // "Asteroid" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							TileList.Add(new AsteroidResource(new Vector2(x * 30, y * 30), asteroidTile, MapArray, ResourceList, 1));
-							break;
-					}
-				}
-			}
 
-			foreach (Resource r in ResourceList)
-			{
-				r.UpdateConnections();
-			}
-
-			for (int x = 0; x < MapArray.GetLength(0) - 1; x++)
-			{
-				for (int y = 0; y < MapArray.GetLength(1) - 1; y++)
-				{
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30 + 30, 0), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(MapArray.GetLength(0) * 30 - 30, y * 30 + 30), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30, MapArray.GetLength(1) * 30 - 30), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(0, y * 30), MapArray, -1, Color.White));
-				}
-			}
-
-			for (int x = 0; x < MapArray.GetLength(0); x++)
-			{
-			}
-
-			for (int y = 0; y < MapArray.GetLength(1) - 2; y++)
-			{
-			}
+			LoadMap();
 
 			// Create the camera.
 			camera = new Camera(GraphicsDevice.Viewport, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), 1.0f);
@@ -362,12 +300,11 @@ namespace RTSMiner.Managers
 			}
 
 			// Tell if the letter 'U' is pressed so we can regenerate the starmap.
-			if (keyboardState.IsKeyDown(Keys.U))
+			if (keyboardState.IsKeyUp(Keys.U) && previousKeyboardState.IsKeyDown(Keys.U))
 			{
-				foreach (Tile t in TileList)
-				{
-					t.GeneratedRandom = false;
-				}
+				TileList.RemoveRange(0, TileList.Count);
+				ResourceList.RemoveRange(0, ResourceList.Count);
+				LoadMap();
 			}
 
 			if (myGame.GameDebug)
@@ -381,6 +318,66 @@ namespace RTSMiner.Managers
 			// Set the previous mouse and keyboard states.
 			previousKeyboardState = keyboardState;
 			previousMouseState = mouseState;
+		}
+
+		protected void LoadMap()
+		{
+			// Create the map
+			MapArray = MapGenerator.SaveMap(MapGenerator.CreateMap(100, 100, 10, 0.03f), 3);
+			// Create the unit map.
+			int[,] UnitArray = Maps.Level1UnitMapGen();
+
+			// Calculate out the map.
+			for (int x = 0; x < MapArray.GetLength(0); x++)
+			{
+				for (int y = 0; y < MapArray.GetLength(1); y++)
+				{
+					switch (MapArray[x, y])
+					{
+						case -1: // "Water"
+							break;
+						case 0: // "Ground" Tiles
+							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							break;
+						case 1: // "Cliff" Tiles
+							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							ResourceList.Add(new StoneResource(new Vector2(x * 30, y * 30), stoneTile, 10, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							break;
+						case 2: // "Uranium" Tiles
+							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							ResourceList.Add(new UraniumResource(new Vector2(x * 30, y * 30), uraniumTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							break;
+						case 3: // "Iron" Tiles
+							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							ResourceList.Add(new IronResource(new Vector2(x * 30, y * 30), ironTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							break;
+						case 4: // "Gold" Tiles
+							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							ResourceList.Add(new GoldResource(new Vector2(x * 30, y * 30), goldTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							break;
+						case 5: // "Asteroid" Tiles
+							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							ResourceList.Add(new AsteroidResource(new Vector2(x * 30, y * 30), asteroidTile, 100, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							break;
+					}
+				}
+			}
+
+			foreach (Resource r in ResourceList)
+			{
+				r.UpdateConnections();
+			}
+
+			for (int x = 0; x < MapArray.GetLength(0) - 1; x++)
+			{
+				for (int y = 0; y < MapArray.GetLength(1) - 1; y++)
+				{
+					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30 + 30, 0), MapArray, -1, Color.White));
+					//BoundryTiles.Add(new Tile(voidTile, new Vector2(MapArray.GetLength(0) * 30 - 30, y * 30 + 30), MapArray, -1, Color.White));
+					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30, MapArray.GetLength(1) * 30 - 30), MapArray, -1, Color.White));
+					//BoundryTiles.Add(new Tile(voidTile, new Vector2(0, y * 30), MapArray, -1, Color.White));
+				}
+			}
 		}
 
 		/// <summary>
