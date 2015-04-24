@@ -71,6 +71,10 @@ namespace RTSMiner.Managers
 		/// The texture of the particles on the screen.
 		/// </summary>
 		public Texture2D particalTexture;
+		/// <summary>
+		/// The heavyMetal background textures.
+		/// </summary>
+		public Texture2D backgroundHeavy;
 		#endregion
 
 		#region Tile Stuff
@@ -90,6 +94,10 @@ namespace RTSMiner.Managers
 		/// The list of boundries in the game.
 		/// </summary>
 		public List<Tile> BoundryTiles = new List<Tile>();
+		/// <summary>
+		/// The list of background tiles in the game;
+		/// </summary>
+		public List<Tile> BackgroundTiles = new List<Tile>();
 		#endregion
 		
 		#region Player Stuff
@@ -159,75 +167,8 @@ namespace RTSMiner.Managers
 			spriteBatch = new SpriteBatch(myGame.GraphicsDevice);
 			// Load all the images.
 			LoadImages();
-<<<<<<< HEAD
-
+			// Loads the map once.
 			LoadMap();
-=======
-			// Create the map
-			MapArray = MapGenerator.SaveMap(MapGenerator.CreateMap(100, 100, 10, 0.03f), 3);
-			// Create the unit map.
-			int[,] UnitArray = Maps.Level1UnitMapGen();
-			
-			// Calculate out the map.
-			for (int x = 0; x < MapArray.GetLength(0); x++)
-			{
-				for (int y = 0; y < MapArray.GetLength(1); y++)
-				{
-					switch (MapArray[x, y])
-					{
-						case -1: // "Water"
-							break;
-						case 0: // "Ground" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							break;
-						case 1: // "Cliff" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new StoneResource(new Vector2(x * 30, y * 30), stoneTile, 10, ResourceList));
-							break;
-						case 2: // "Uranium" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new UraniumResource(new Vector2(x * 30, y * 30), uraniumTile, 15, ResourceList));
-							break;
-						case 3: // "Iron" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new IronResource(new Vector2(x * 30, y * 30), ironTile, 15, ResourceList));
-							break;
-						case 4: // "Gold" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new GoldResource(new Vector2(x * 30, y * 30), goldTile, 15, ResourceList));
-							break;
-						case 5: // "Asteroid" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							TileList.Add(new AsteroidResource(new Vector2(x * 30, y * 30), asteroidTile, MapArray, ResourceList, 1));
-							break;
-					}
-				}
-			}
-
-			foreach (Resource r in ResourceList)
-			{
-				r.UpdateConnections();
-			}
-
-			for (int x = 0; x < MapArray.GetLength(0) - 1; x++)
-			{
-				for (int y = 0; y < MapArray.GetLength(1) - 1; y++)
-				{
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30 + 30, 0), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(MapArray.GetLength(0) * 30 - 30, y * 30 + 30), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30, MapArray.GetLength(1) * 30 - 30), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(0, y * 30), MapArray, -1, Color.White));
-				}
-			}
-
-			for (int x = 0; x < MapArray.GetLength(0); x++)
-			{
-			}
-
-			for (int y = 0; y < MapArray.GetLength(1) - 2; y++)
-			{
-			}
->>>>>>> master
 
 			// Create the camera.
 			camera = new Camera(GraphicsDevice.Viewport, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), 1.0f);
@@ -245,6 +186,7 @@ namespace RTSMiner.Managers
 			uraniumTile = Game.Content.Load<Texture2D>(@"images\tilesets\uranium");
 			ironTile = Game.Content.Load<Texture2D>(@"images\tilesets\iron");
 			goldTile = Game.Content.Load<Texture2D>(@"images\tilesets\gold");
+			backgroundHeavy = Game.Content.Load<Texture2D>(@"images\gui\backgroundHeavy");
 		}
 
 		/// <summary>
@@ -264,12 +206,28 @@ namespace RTSMiner.Managers
 			int MoveRadius = 20;
 			// The speed to move the camera at.
 			int MoveSpeed = 5;
-			
+
 			#region Camera Controls
-			// Rotate the camera to the left.
-			if (keyboardState.IsKeyDown(Keys.NumPad7))
+			if (keyboardState.IsKeyDown(Keys.Add))
 			{
-				camera.Rotation += 1 * (float)Math.PI / 180;
+				camera.RotationX += 0.01f * (float)Math.PI / 180;
+			}
+			if (keyboardState.IsKeyDown(Keys.Subtract))
+			{
+				camera.RotationX -= 0.01f * (float)Math.PI / 180;
+			}
+			if (keyboardState.IsKeyDown(Keys.Multiply))
+			{
+				camera.RotationY += 0.01f * (float)Math.PI / 180;
+			}
+			if (keyboardState.IsKeyDown(Keys.Divide))
+			{
+				camera.RotationY -= 0.01f * (float)Math.PI / 180;
+			}
+			// Rotate the camera to the left.
+			if (keyboardState.IsKeyDown(Keys.NumPad9))
+			{
+				camera.RotationZ += 1.00f * (float)Math.PI / 180;
 			}
 			// Move the camera up.
 			if (keyboardState.IsKeyDown(Keys.NumPad8))
@@ -277,9 +235,9 @@ namespace RTSMiner.Managers
 				camera.Position -= new Vector2(0, 5);
 			}
 			// Rotate the camera to the right.
-			if (keyboardState.IsKeyDown(Keys.NumPad9))
+			if (keyboardState.IsKeyDown(Keys.NumPad7))
 			{
-				camera.Rotation -= 1 * (float)Math.PI / 180;
+				camera.RotationZ -= 1.00f * (float)Math.PI / 180;
 			}
 			// Move the camera to the left.
 			if (keyboardState.IsKeyDown(Keys.NumPad4))
@@ -290,7 +248,9 @@ namespace RTSMiner.Managers
 			if (keyboardState.IsKeyDown(Keys.NumPad5))
 			{
 				camera.Zoom = 1f;
-				camera.Rotation = 0;
+				camera.RotationX = 0;
+				camera.RotationY = 0;
+				camera.RotationZ = 0;
 				camera.Position = new Vector2(0, 0);
 			}
 			// Move the camera to the right.
@@ -302,6 +262,7 @@ namespace RTSMiner.Managers
 			if (keyboardState.IsKeyDown(Keys.NumPad1))
 			{
 				camera.Zoom += 0.01f;
+				camera.Position -= new Vector2(0.0f, 0.0f);
 			}
 			// Move the camera down.
 			if (keyboardState.IsKeyDown(Keys.NumPad2))
@@ -312,6 +273,7 @@ namespace RTSMiner.Managers
 			if (keyboardState.IsKeyDown(Keys.NumPad3))
 			{
 				camera.Zoom -= 0.01f;
+				camera.Position -= new Vector2(0.0f, 0.0f);
 			}
 			#endregion
 
@@ -362,25 +324,22 @@ namespace RTSMiner.Managers
 
 			foreach (Tile t in BoundryTiles)
 			{
-				// Updated the boundry tiles.
+				// Update the boundry tiles.
+				t.Update(gameTime);
+			}
+
+			foreach (Tile t in BackgroundTiles)
+			{
+				// Update all the background tiles.
 				t.Update(gameTime);
 			}
 
 			// Tell if the letter 'U' is pressed so we can regenerate the starmap.
-<<<<<<< HEAD
 			if (keyboardState.IsKeyUp(Keys.U) && previousKeyboardState.IsKeyDown(Keys.U))
 			{
 				TileList.RemoveRange(0, TileList.Count);
 				ResourceList.RemoveRange(0, ResourceList.Count);
 				LoadMap();
-=======
-			if (keyboardState.IsKeyDown(Keys.U))
-			{
-				foreach (Tile t in TileList)
-				{
-					t.GeneratedRandom = false;
-				}
->>>>>>> master
 			}
 
 			if (myGame.GameDebug)
@@ -396,7 +355,6 @@ namespace RTSMiner.Managers
 			previousMouseState = mouseState;
 		}
 
-<<<<<<< HEAD
 		protected void LoadMap()
 		{
 			// Create the map
@@ -455,16 +413,36 @@ namespace RTSMiner.Managers
 					//BoundryTiles.Add(new Tile(voidTile, new Vector2(0, y * 30), MapArray, -1, Color.White));
 				}
 			}
+
+			int TileSize = (int)(backgroundHeavy.Width / 4);
+			Point ScreenGridSize = new Point((int)(myGame.WindowSize.X / TileSize), (int)(myGame.WindowSize.Y / TileSize));
+
+			for (int x = 0; x < ScreenGridSize.X + 1; x++)
+			{
+				for (int y = 0; y < ScreenGridSize.Y + 1; y++)
+				{
+					BackgroundTiles.Add(new Tile(backgroundHeavy, new Vector2(x * TileSize, y * TileSize), 0, random.Next(998524), Color.White));
+				}
+			}
 		}
 
-=======
->>>>>>> master
 		/// <summary>
 		/// Draws the game component's content.
 		/// </summary>
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		public override void Draw(GameTime gameTime)
 		{
+			// Draw the back stage.
+			spriteBatch.Begin();
+			{
+				foreach (Tile t in BackgroundTiles)
+				{
+					// Draw all the background tiles.
+					t.Draw(gameTime, spriteBatch);
+				}
+			}
+			spriteBatch.End();
+
 			// Draw in the frame of the camera.
 			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, camera.GetTransformation());
 			{
