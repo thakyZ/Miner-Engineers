@@ -94,10 +94,6 @@ namespace RTSMiner.Managers
 		/// The list of boundries in the game.
 		/// </summary>
 		public List<Tile> BoundryTiles = new List<Tile>();
-		/// <summary>
-		/// The list of background tiles in the game;
-		/// </summary>
-		public List<Tile> BackgroundTiles = new List<Tile>();
 		#endregion
 		
 		#region Player Stuff
@@ -169,10 +165,12 @@ namespace RTSMiner.Managers
 			LoadImages();
 			// Loads the map once.
 			LoadMap();
+			// Load the background.
+			myGame.GenerateBackground();
 
 			// Create the camera.
 			camera = new Camera(GraphicsDevice.Viewport, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), 1.0f);
-			camera.Position = Vector2.Zero; // Set the camera's position to Zero.
+			camera.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2); // Set the camera's position to Zero.
 			
 			base.LoadContent();
 		}
@@ -208,39 +206,13 @@ namespace RTSMiner.Managers
 			int MoveSpeed = 5;
 
 			#region Camera Controls
-			if (keyboardState.IsKeyDown(Keys.Add))
-			{
-				camera.RotationX += 0.01f * (float)Math.PI / 180;
-			}
-			if (keyboardState.IsKeyDown(Keys.Subtract))
-			{
-				camera.RotationX -= 0.01f * (float)Math.PI / 180;
-			}
-			if (keyboardState.IsKeyDown(Keys.Multiply))
-			{
-				camera.RotationY += 0.01f * (float)Math.PI / 180;
-			}
-			if (keyboardState.IsKeyDown(Keys.Divide))
-			{
-				camera.RotationY -= 0.01f * (float)Math.PI / 180;
-			}
-			// Rotate the camera to the left.
-			if (keyboardState.IsKeyDown(Keys.NumPad9))
-			{
-				camera.RotationZ += 1.00f * (float)Math.PI / 180;
-			}
 			// Move the camera up.
-			if (keyboardState.IsKeyDown(Keys.NumPad8))
+			if (keyboardState.IsKeyDown(Keys.Up))
 			{
 				camera.Position -= new Vector2(0, 5);
 			}
-			// Rotate the camera to the right.
-			if (keyboardState.IsKeyDown(Keys.NumPad7))
-			{
-				camera.RotationZ -= 1.00f * (float)Math.PI / 180;
-			}
 			// Move the camera to the left.
-			if (keyboardState.IsKeyDown(Keys.NumPad4))
+			if (keyboardState.IsKeyDown(Keys.Left))
 			{
 				camera.Position -= new Vector2(5, 0);
 			}
@@ -254,26 +226,14 @@ namespace RTSMiner.Managers
 				camera.Position = new Vector2(0, 0);
 			}
 			// Move the camera to the right.
-			if (keyboardState.IsKeyDown(Keys.NumPad6))
+			if (keyboardState.IsKeyDown(Keys.Right))
 			{
 				camera.Position += new Vector2(5, 0);
 			}
-			// Zoom the camera in.
-			if (keyboardState.IsKeyDown(Keys.NumPad1))
-			{
-				camera.Zoom += 0.01f;
-				camera.Position -= new Vector2(0.0f, 0.0f);
-			}
 			// Move the camera down.
-			if (keyboardState.IsKeyDown(Keys.NumPad2))
+			if (keyboardState.IsKeyDown(Keys.Down))
 			{
 				camera.Position += new Vector2(0, 5);
-			}
-			// Zoom the camera out.
-			if (keyboardState.IsKeyDown(Keys.NumPad3))
-			{
-				camera.Zoom -= 0.01f;
-				camera.Position -= new Vector2(0.0f, 0.0f);
 			}
 			#endregion
 
@@ -305,6 +265,8 @@ namespace RTSMiner.Managers
 				}
 			}
 
+			camera.Position += new Vector2(0, 0);
+
 			if (keyboardState.IsKeyDown(Keys.Escape))
 			{
 				myGame.SetCurrentLevel(Game1.GameLevels.MENU);
@@ -328,7 +290,7 @@ namespace RTSMiner.Managers
 				t.Update(gameTime);
 			}
 
-			foreach (Tile t in BackgroundTiles)
+			foreach (Tile t in myGame.BackgroundTilesList)
 			{
 				// Update all the background tiles.
 				t.Update(gameTime);
@@ -346,6 +308,11 @@ namespace RTSMiner.Managers
 			{
 				// Update the debug label.
 				myGame.debugLabel.Update(gameTime);
+			}
+
+			if (myGame.isOptionsChanged > myGame.OldIsOptionsChanged)
+			{
+				camera.viewportSize = new Vector2(myGame.WindowSize.X, myGame.WindowSize.Y);
 			}
 			
 			base.Update(gameTime);
@@ -413,17 +380,6 @@ namespace RTSMiner.Managers
 					//BoundryTiles.Add(new Tile(voidTile, new Vector2(0, y * 30), MapArray, -1, Color.White));
 				}
 			}
-
-			int TileSize = (int)(backgroundHeavy.Width / 4);
-			Point ScreenGridSize = new Point((int)(myGame.WindowSize.X / TileSize), (int)(myGame.WindowSize.Y / TileSize));
-
-			for (int x = 0; x < ScreenGridSize.X + 1; x++)
-			{
-				for (int y = 0; y < ScreenGridSize.Y + 1; y++)
-				{
-					BackgroundTiles.Add(new Tile(backgroundHeavy, new Vector2(x * TileSize, y * TileSize), 0, random.Next(998524), Color.White));
-				}
-			}
 		}
 
 		/// <summary>
@@ -435,7 +391,7 @@ namespace RTSMiner.Managers
 			// Draw the back stage.
 			spriteBatch.Begin();
 			{
-				foreach (Tile t in BackgroundTiles)
+				foreach (Tile t in myGame.BackgroundTilesList)
 				{
 					// Draw all the background tiles.
 					t.Draw(gameTime, spriteBatch);

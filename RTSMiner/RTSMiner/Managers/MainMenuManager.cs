@@ -24,15 +24,9 @@ namespace RTSMiner.Managers
 
 		Random random = new Random();
 
-		Texture2D buttonTexture;
-		Texture2D backgroundHeavy;
-		SpriteFont segoeUIBold;
-
 		Button PlayButton;
-
-		Point screenTileSize;
-
-		List<Tile> TilesList = new List<Tile>();
+		Button OptionsButton;
+		Button ExitButton;
 
 		public MainMenuManager(Game1 game)
 			: base(game)
@@ -60,26 +54,15 @@ namespace RTSMiner.Managers
 
 			LoadImages();
 
-			PlayButton = new Button(buttonTexture, new Vector2((myGame.WindowSize.X - buttonTexture.Width) / 2, 150), segoeUIBold, 1.0f, new Color(0, 160, 58), "PLAY", Color.White);
-
-			screenTileSize = new Point((int)(myGame.WindowSize.X / 128) + 1, (int)(myGame.WindowSize.X / 128) + 1);
-
-			for (int x = 0; x < screenTileSize.X; x++)
-			{
-				for (int y = 0; y < screenTileSize.Y; y++)
-				{
-					TilesList.Add(new Tile(backgroundHeavy, new Vector2(x * 128, y * 128), 0, random.Next(743874982), Color.White));
-				}
-			}
+			PlayButton = new Button(myGame.button1Texture, new Vector2((myGame.WindowSize.X - (myGame.button1Texture.Width / 3)) / 2, 150), myGame.segoeUIBold, 1.0f, new Color(0, 160, 58), "PLAY", Color.White);
+			OptionsButton = new Button(myGame.button1Texture, new Vector2((myGame.WindowSize.X - (myGame.button1Texture.Width / 3)) / 2, 230), myGame.segoeUIBold, 1.0f, new Color(0, 160, 58), "OPTIONS", Color.White);
+			ExitButton = new Button(myGame.button1Texture, new Vector2((myGame.WindowSize.X - (myGame.button1Texture.Width / 3)) / 2, 310), myGame.segoeUIBold, 1.0f, new Color(0, 160, 58), "EXIT", Color.White);
 
 			base.LoadContent();
 		}
 
 		protected void LoadImages()
 		{
-			buttonTexture = Game.Content.Load<Texture2D>(@"images\gui\button2");
-			backgroundHeavy = Game.Content.Load<Texture2D>(@"images\gui\backgroundHeavy");
-			segoeUIBold = Game.Content.Load<SpriteFont>(@"fonts\segoeuibold");
 		}
 
 		/// <summary>
@@ -90,6 +73,8 @@ namespace RTSMiner.Managers
 		{
 			// TODO: Add your update code here
 			PlayButton.Update(gameTime);
+			OptionsButton.Update(gameTime);
+			ExitButton.Update(gameTime);
 			myGame.cursor.Update(gameTime);
 
 			if (PlayButton.Clicked())
@@ -97,9 +82,26 @@ namespace RTSMiner.Managers
 				myGame.SetCurrentLevel(Game1.GameLevels.GAME);
 			}
 
-			foreach (Tile t in TilesList)
+			if (OptionsButton.Clicked())
+			{
+				myGame.SetCurrentLevel(Game1.GameLevels.OPTIONS);
+			}
+
+			if (ExitButton.Clicked())
+			{
+				myGame.Exit();
+			}
+
+			foreach (Tile t in myGame.BackgroundTilesList)
 			{
 				t.Update(gameTime);
+			}
+
+			if (myGame.isOptionsChanged > myGame.OldIsOptionsChanged)
+			{
+				PlayButton.Position = new Vector2((myGame.WindowSize.X - (myGame.button1Texture.Width / 3)) / 2, 150);
+				OptionsButton.Position = new Vector2((myGame.WindowSize.X - (myGame.button1Texture.Width / 3)) / 2, 230);
+				ExitButton.Position = new Vector2((myGame.WindowSize.X - (myGame.button1Texture.Width / 3)) / 2, 310);
 			}
 
 			base.Update(gameTime);
@@ -109,12 +111,14 @@ namespace RTSMiner.Managers
 		{
 			spriteBatch.Begin();
 			{
-				foreach (Tile t in TilesList)
+				foreach (Tile t in myGame.BackgroundTilesList)
 				{
 					t.Draw(gameTime, spriteBatch);
 				}
 
 				PlayButton.Draw(gameTime, spriteBatch);
+				OptionsButton.Draw(gameTime, spriteBatch);
+				ExitButton.Draw(gameTime, spriteBatch);
 				myGame.cursor.Draw(gameTime, spriteBatch);
 
 				if (myGame.GameDebug)

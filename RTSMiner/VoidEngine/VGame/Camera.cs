@@ -37,8 +37,8 @@ namespace VoidEngine.VGame
 		public Camera(Viewport viewport, Point worldSize, float initialZoom)
 		{
 			zoom = initialZoom;
-			rotationX = 0.2f * (float)Math.PI / 180;
-			rotationY = 0.1f * (float)Math.PI / 180;
+			rotationX = 0.0f * (float)Math.PI / 180;
+			rotationY = 0.0f * (float)Math.PI / 180;
 			rotationZ = 0.0f * (float)Math.PI / 180;
 			position = Vector2.Zero;
 			viewportSize = new Vector2(viewport.Width, viewport.Height);
@@ -60,14 +60,7 @@ namespace VoidEngine.VGame
 			{
 				zoom = value;
 
-				if (zoom < zoomLowerLimit)
-				{
-					zoom = zoomLowerLimit;
-				}
-				if (zoom > zoomUpperLimit)
-				{
-					zoom = zoomUpperLimit;
-				}
+				zoom = MathHelper.Clamp(zoom, zoomLowerLimit, zoomUpperLimit);
 			}
 		}
 
@@ -151,9 +144,9 @@ namespace VoidEngine.VGame
 			}
 			set
 			{
-				Rectangle limits = new Rectangle((int)(viewportSize.X * 0.5f), (int)(viewportSize.Y * 0.5f), (int)(worldSize.X - viewportSize.X * 1.5f / zoom), (int)(worldSize.Y - viewportSize.Y * 1.5f / zoom));
+				Rectangle limits = new Rectangle((int)(viewportSize.X / 2), (int)(viewportSize.Y / 2), (int)(worldSize.X - viewportSize.X * 1.5f / zoom), (int)(worldSize.Y - viewportSize.Y * 1.5f / zoom));
 				position = value;
-				position = new Vector2(MathHelper.Clamp(position.X, limits.X, limits.Right), MathHelper.Clamp(position.Y, limits.Y, limits.Bottom));
+				position = new Vector2(MathHelper.Clamp(position.X, limits.Left, limits.Right), MathHelper.Clamp(position.Y, limits.Top, limits.Bottom));
 			}
 		}
 

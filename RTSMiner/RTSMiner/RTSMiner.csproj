@@ -114,6 +114,7 @@
     <Compile Include="Helpers\RTSHelper.cs" />
     <Compile Include="Managers\GameManager.cs" />
     <Compile Include="Managers\MainMenuManager.cs" />
+    <Compile Include="Managers\OptionsManager.cs" />
     <Compile Include="Other\Cursor.cs" />
     <Compile Include="Other\Maps.cs" />
     <Compile Include="Resources\AsteroidResource.cs" />

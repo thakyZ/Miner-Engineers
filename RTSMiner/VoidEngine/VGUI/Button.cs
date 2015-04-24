@@ -31,6 +31,18 @@ namespace VoidEngine.VGUI
 
 		protected Label label; // This is the label that the button has overlayed on it.
 
+		public string Text
+		{
+			get
+			{
+				return label.Text;
+			}
+			set
+			{
+				label.Text = value;
+			}
+		}
+
 		protected bState buttonState = new bState(); // This is the button state variable
 		protected bool mousePress = false; // This
 		protected bool previousMousePress = false;

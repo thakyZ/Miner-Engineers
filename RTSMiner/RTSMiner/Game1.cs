@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Media;
 using RTSMiner.Managers;
 using RTSMiner.Other;
 using VoidEngine.VGUI;
+using VoidEngine.VGame;
 
 namespace RTSMiner
 {
@@ -27,21 +28,67 @@ namespace RTSMiner
 			GAME
 		}
 
-		public GameLevels currentGameLevel;
-
+		#region Variables
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 
+		#region Options stuff
+		/// <summary>
+		/// The current window Size
+		/// </summary>
 		public Point WindowSize = new Point(1200, 720);//new Point(800, 480);
+		/// <summary>
+		/// Gets or sets if vsync is active;
+		/// </summary>
+		public bool isVSync
+		{
+			get;
+			set;
+		}
+		/// <summary>
+		/// Gets or sets if the options are comfirmed.
+		/// </summary>
+		public bool OptionsComfirmed
+		{
+			get;
+			set;
+		}
+		/// <summary>
+		/// Gets or sets if the options have been changed.
+		/// </summary>
+		public int isOptionsChanged
+		{
+			get;
+			protected set;
+		}
+		/// <summary>
+		/// Gets or sets if the options have been changed.
+		/// </summary>
+		public int OldIsOptionsChanged
+		{
+			get;
+			protected set;
+		}
+		#endregion
 
+		#region Other stuff
+		/// <summary>
+		/// The random generator for stuff.
+		/// </summary>
+		public Random random = new Random();
+		/// <summary>
+		/// The current and previous keyboard states.
+		/// </summary>
+		public KeyboardState keyboardState, previousKeyboardState;
+		#endregion
+
+		#region Managers
 		GameManager gameManager;
 		MainMenuManager mainMenuManager;
+		OptionsManager optionsManager;
+		#endregion
 
-		/// <summary>
-		/// Used to control the cursor.
-		/// </summary>
-		public Cursor cursor;
-
+		#region Textures
 		/// <summary>
 		/// The texture of the cursor.
 		/// </summary>
@@ -50,6 +97,42 @@ namespace RTSMiner
 		/// The SpriteFont for debuging the game.
 		/// </summary>
 		public SpriteFont segoeUIMonoDebug;
+		/// <summary>
+		/// The SpriteFont for buttons.
+		/// </summary>
+		public SpriteFont segoeUIBold;
+		/// <summary>
+		/// The larger button terxture.
+		/// </summary>
+		public Texture2D button1Texture;
+		/// <summary>
+		/// The smaller button terxture.
+		/// </summary>
+		public Texture2D button2Texture;
+		/// <summary>
+		/// The background tiles.
+		/// </summary>
+		public Texture2D backgroundHeavy;
+		#endregion
+
+		#region Gui stuff
+		/// <summary>
+		/// Used to control the cursor.
+		/// </summary>
+		public Cursor cursor;
+		/// <summary>
+		/// The current game level or screen.
+		/// </summary>
+		protected GameLevels currentGameLevel;
+		#endregion
+
+		#region Tile stuff
+		/// <summary>
+		/// The list of tiles for the background.
+		/// </summary>
+		public List<Tile> BackgroundTilesList = new List<Tile>();
+		protected bool isBackgroundGenerated;
+		#endregion
 
 		#region Debug Stuff
 		/// <summary>
@@ -64,6 +147,7 @@ namespace RTSMiner
 		/// The list of strings that are used for debuging.
 		/// </summary>
 		public string[] debugStrings = new string[10];
+		#endregion
 		#endregion
 
 		public Game1()
@@ -94,19 +178,27 @@ namespace RTSMiner
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			cursorTexture = Content.Load<Texture2D>(@"images\cursor\cursor1");
-			segoeUIMonoDebug = Content.Load<SpriteFont>(@"fonts\segoeuimonodebug");
+			LoadImages();
 
+			// Create the managers.
 			gameManager = new GameManager(this);
 			mainMenuManager = new MainMenuManager(this);
+			optionsManager = new OptionsManager(this);
+			// Add the managers to components.
 			Components.Add(gameManager);
 			Components.Add(mainMenuManager);
+			Components.Add(optionsManager);
+			// Disable the managers.
 			gameManager.Enabled = false;
 			gameManager.Visible = false;
 			mainMenuManager.Enabled = false;
 			mainMenuManager.Visible = false;
+			optionsManager.Enabled = false;
+			optionsManager.Visible = false;
 
 			cursor = new Cursor(cursorTexture, Vector2.Zero);
+
+			OptionsComfirmed = true;
 
 			// Create the debug label.
 			if (GameDebug)
@@ -116,6 +208,19 @@ namespace RTSMiner
 
 			// TODO: use this.Content to load your game content here
 			SetCurrentLevel(GameLevels.MENU);
+		}
+
+		protected void LoadImages()
+		{
+			// Load textures.
+			cursorTexture = Content.Load<Texture2D>(@"images\cursor\cursor1");
+			button1Texture = Content.Load<Texture2D>(@"images\gui\button2");
+			button2Texture = Content.Load<Texture2D>(@"images\gui\button1");
+			backgroundHeavy = Content.Load<Texture2D>(@"images\gui\backgroundHeavy");
+
+			// Load fonts.
+			segoeUIMonoDebug = Content.Load<SpriteFont>(@"fonts\segoeuimonodebug");
+			segoeUIBold = Content.Load<SpriteFont>(@"fonts\segoeuibold");
 		}
 
 		/// <summary>
@@ -136,13 +241,31 @@ namespace RTSMiner
 		{
 			// Allows the game to exit
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-				this.Exit();
-
-			if (WindowSize != new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight))
 			{
-				graphics.PreferredBackBufferWidth = WindowSize.X;
-				graphics.PreferredBackBufferHeight = WindowSize.Y;
+				this.Exit();
+			}
+
+			if (OptionsComfirmed)
+			{
+				if (WindowSize != new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight))
+				{
+					graphics.PreferredBackBufferWidth = WindowSize.X;
+					graphics.PreferredBackBufferHeight = WindowSize.Y;
+				}
+
+				graphics.SynchronizeWithVerticalRetrace = isVSync;
+
 				graphics.ApplyChanges();
+
+				if (!isBackgroundGenerated)
+				{
+					GenerateBackground();
+				}
+
+				OptionsComfirmed = false;
+
+				OldIsOptionsChanged = isOptionsChanged;
+				isOptionsChanged += 1;
 			}
 
 			// Tell if the game is in debug mode.
@@ -177,6 +300,21 @@ namespace RTSMiner
 			base.Draw(gameTime);
 		}
 
+		public void GenerateBackground()
+		{
+			Point screenTileSize = new Point((int)(WindowSize.X / 128) + 1, (int)(WindowSize.X / 128) + 1);
+
+			for (int x = 0; x < screenTileSize.X; x++)
+			{
+				for (int y = 0; y < screenTileSize.Y; y++)
+				{
+					BackgroundTilesList.Add(new Tile(backgroundHeavy, new Vector2(x * 128, y * 128), 0, random.Next(743874982), Color.White));
+				}
+			}
+
+			isBackgroundGenerated = true;
+		}
+
 		/// <summary>
 		/// This sets the current scene or level that the game is at.
 		/// </summary>
@@ -193,8 +331,9 @@ namespace RTSMiner
 				mainMenuManager.Visible = false;
 				gameManager.Enabled = false;
 				gameManager.Visible = false;
-				//optionsManager.Enabled = false;
-				//optionsManager.Visible = false;
+				optionsManager.Enabled = false;
+				optionsManager.Visible = false;
+				isBackgroundGenerated = false;
 			}
 
 			switch (currentGameLevel)
@@ -208,8 +347,8 @@ namespace RTSMiner
 					mainMenuManager.Visible = true;
 					break;
 				case GameLevels.OPTIONS:
-					//optionsManager.Enabled = true;
-					//optionsManager.Visible = true;
+					optionsManager.Enabled = true;
+					optionsManager.Visible = true;
 					break;
 				case GameLevels.GAME:
 					gameManager.Enabled = true;

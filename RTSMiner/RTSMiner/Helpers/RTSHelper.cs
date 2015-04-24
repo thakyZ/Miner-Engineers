@@ -29,6 +29,13 @@ namespace RTSMiner.Helpers
 			/// </summary>
 			public int Gold;
 
+			/// <summary>
+			/// Creates an inventory.
+			/// </summary>
+			/// <param name="InitUranium">The starting amount of uranium.</param>
+			/// <param name="InitStone">The starting amount of stone.</param>
+			/// <param name="InitIron">The starting amount of iron.</param>
+			/// <param name="InitGold">The starting amount of gold.</param>
 			public Inventory(int InitUranium, int InitStone, int InitIron, int InitGold)
 			{
 				Uranium = InitUranium;
