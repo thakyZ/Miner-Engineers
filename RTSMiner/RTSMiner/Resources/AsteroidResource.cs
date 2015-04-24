@@ -14,16 +14,16 @@ using RTSMiner.Helpers;
 
 namespace RTSMiner.Resources
 {
-	public class StoneResource : Resource
+	public class AsteroidResource : Resource
 	{
-		public StoneResource(Vector2 position, Texture2D texture, int hp, Point worldSize, List<Resource> ResourceList)
+		public AsteroidResource(Vector2 position, Texture2D texture, int hp, Point worldSize, List<Resource> ResourceList)
 			: base(position, texture, worldSize, ResourceList)
 		{
 			GridSize = 30;
 			AddAnimations(texture);
-			ResourceType = RTSHelper.ResourceTypes.STONE;
+			ResourceType = RTSHelper.ResourceTypes.ASTEROID;
 			MainHP = hp;
-			Breakable = true;
+			Breakable = false;
 		}
 
 		public override void Update(GameTime gameTime)

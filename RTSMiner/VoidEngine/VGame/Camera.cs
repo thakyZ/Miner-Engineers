@@ -20,7 +20,9 @@ namespace VoidEngine.VGame
 		float zoom;
 		Matrix transform;
 		Vector2 position;
-		float rotation;
+		float rotationX;
+		float rotationY;
+		float rotationZ;
 		public Vector2 viewportSize;
 		Point worldSize;
 		Vector2 screenCenter;
@@ -35,7 +37,9 @@ namespace VoidEngine.VGame
 		public Camera(Viewport viewport, Point worldSize, float initialZoom)
 		{
 			zoom = initialZoom;
-			rotation = 0.0f;
+			rotationX = 0.2f * (float)Math.PI / 180;
+			rotationY = 0.1f * (float)Math.PI / 180;
+			rotationZ = 0.0f * (float)Math.PI / 180;
 			position = Vector2.Zero;
 			viewportSize = new Vector2(viewport.Width, viewport.Height);
 			this.worldSize = worldSize;
@@ -70,15 +74,45 @@ namespace VoidEngine.VGame
 		/// <summary>
 		/// Gets or sets the rotation of the camera.
 		/// </summary>
-		public float Rotation
+		public float RotationX
 		{
 			get
 			{
-				return rotation;
+				return rotationX;
 			}
 			set
 			{
-				rotation = value;
+				rotationX = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the rotation of the camera.
+		/// </summary>
+		public float RotationY
+		{
+			get
+			{
+				return rotationY;
+			}
+			set
+			{
+				rotationY = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the rotation of the camera.
+		/// </summary>
+		public float RotationZ
+		{
+			get
+			{
+				return rotationZ;
+			}
+			set
+			{
+				rotationZ = value;
 			}
 		}
 
@@ -117,7 +151,7 @@ namespace VoidEngine.VGame
 			}
 			set
 			{
-				Rectangle limits = new Rectangle((int)(0), (int)(0), (int)(worldSize.X - viewportSize.X * 1.5f), (int)(worldSize.Y - viewportSize.Y * 1.5f));
+				Rectangle limits = new Rectangle((int)(viewportSize.X * 0.5f), (int)(viewportSize.Y * 0.5f), (int)(worldSize.X - viewportSize.X * 1.5f / zoom), (int)(worldSize.Y - viewportSize.Y * 1.5f / zoom));
 				position = value;
 				position = new Vector2(MathHelper.Clamp(position.X, limits.X, limits.Right), MathHelper.Clamp(position.Y, limits.Y, limits.Bottom));
 			}
@@ -128,7 +162,7 @@ namespace VoidEngine.VGame
 		/// </summary>
 		public Matrix GetTransformation()
 		{
-			transform = Matrix.CreateTranslation(new Vector3(-position.X, -position.Y, 0)) * Matrix.CreateRotationZ(Rotation) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)); //* Matrix.CreateTranslation(new Vector3(viewportSize.X, viewportSize.Y, 0));
+			transform = Matrix.CreateTranslation(new Vector3(-position.X, -position.Y, 0)) * Matrix.CreateRotationX(RotationX) * Matrix.CreateRotationY(RotationY) * Matrix.CreateRotationZ(RotationZ) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) * Matrix.CreateTranslation(new Vector3(viewportSize.X * 0.5f, viewportSize.Y * 0.5f, 0));
 
 			return transform;
 		}
