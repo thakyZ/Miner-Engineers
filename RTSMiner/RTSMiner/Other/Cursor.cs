@@ -47,7 +47,7 @@ namespace RTSMiner.Other
 
 			base.Update(gameTime);
 		}
-		
+
 		/// <summary>
 		/// Draw the cursor.
 		/// </summary>

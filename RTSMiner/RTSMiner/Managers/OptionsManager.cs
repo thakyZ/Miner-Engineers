@@ -83,7 +83,7 @@ namespace RTSMiner.Managers
 
 		protected void LoadImages()
 		{
-			
+
 		}
 
 		/// <summary>

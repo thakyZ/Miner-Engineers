@@ -21,7 +21,7 @@ namespace RTSMiner.Resources
 		{
 			GridSize = 30;
 			AddAnimations(texture);
-			ResourceType = RTSHelper.ResourceTypes.ASTEROID;
+			ResourceType = RTSHelper.ResourceTypes.Asteroid;
 			MainHP = hp;
 			Breakable = false;
 		}

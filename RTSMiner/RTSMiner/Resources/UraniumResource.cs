@@ -21,7 +21,7 @@ namespace RTSMiner.Resources
 		{
 			GridSize = 30;
 			AddAnimations(texture);
-			ResourceType = RTSHelper.ResourceTypes.URANIUM;
+			ResourceType = RTSHelper.ResourceTypes.Uranium;
 			MainHP = hp;
 			Breakable = true;
 		}

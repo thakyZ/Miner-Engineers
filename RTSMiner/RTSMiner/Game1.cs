@@ -83,7 +83,7 @@ namespace RTSMiner
 		#endregion
 
 		#region Managers
-		GameManager gameManager;
+		public GameManager gameManager;
 		MainMenuManager mainMenuManager;
 		OptionsManager optionsManager;
 		#endregion

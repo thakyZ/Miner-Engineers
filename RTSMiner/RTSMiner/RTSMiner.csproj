@@ -110,6 +110,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Other\MapHelper.cs" />
+    <Compile Include="Units\BlueHarvester.cs" />
+    <Compile Include="Units\BlueHQ.cs" />
+    <Compile Include="Units\Unit.cs" />
     <Compile Include="GUI\ProgressBar.cs" />
     <Compile Include="Helpers\RTSHelper.cs" />
     <Compile Include="Managers\GameManager.cs" />
@@ -122,8 +126,6 @@
     <Compile Include="Resources\GoldResource.cs" />
     <Compile Include="Resources\StoneResource.cs" />
     <Compile Include="Resources\Resource.cs" />
-    <Compile Include="Particles\Particle.cs" />
-    <Compile Include="Particles\ParticleSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />

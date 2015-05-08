@@ -92,66 +92,6 @@ namespace VoidEngine.VGenerator
 			destinationMap[x, y] = (byte)MathHelper.Clamp((sourceMap[x, y] + difference * .2f + randomPct), 0, 255);
 		}
 
-
-		/// <summary>
-		/// Saves the map to a file
-		/// </summary>
-		/// <param name="map">The map data to use</param>
-		/// <param name="path">The filepath to use</param>
-		/// <param name="oceanLevel">The ocean level to use. If it is zero a simple map with " " and "X" is generated for water/land.
-		/// If oceanLevel is above zero a map with heights is generated</param>
-		public static int[,] SaveMap(byte[,] map, byte oceanLevel)
-		{
-			int[,] mapArray = new int[map.GetLength(0), map.GetLength(1)];
-
-			//write all tiles
-			for (int y = 0; y < map.GetLength(1); y++)
-			{
-				for (int x = 0; x < map.GetLength(0); x++)
-				{
-					//writes number between -2 and 1 depending on range of height
-					//Deep Water = -2
-					//Shallow Water = -1
-					//Land = 0
-					// Mountain = 1
-
-					if (map[x, y] > oceanLevel - 1)
-					{
-						int LandLevelTemp = 0;
-						
-						if (map[x, y] < 15)
-						{
-							LandLevelTemp = 1;
-						}
-						else if (map[x, y] >= 15 && map[x, y] < 20)
-						{
-							LandLevelTemp = 2;
-						}
-						else if (map[x, y] >= 20 && map[x, y] < 25)
-						{
-							LandLevelTemp = 3;
-						}
-						else if (map[x, y] >= 25 && map[x, y] < 30)
-						{
-							LandLevelTemp = 4;
-						}
-						else if (map[x, y] >= 30)
-						{
-							LandLevelTemp = 5;
-						}
-
-						mapArray[x, y] = LandLevelTemp;
-					}
-					else if (map[x, y] < oceanLevel)
-					{
-						mapArray[x, y] = 0;
-					}
-				}
-			}
-
-			return mapArray;
-		}
-
 		public static byte[,] LoadMapWithHeight(string path)
 		{
 

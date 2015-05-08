@@ -44,62 +44,65 @@ namespace RTSMiner.Helpers
 				Gold = InitGold;
 			}
 		}
-		
+
 		/// <summary>
 		/// This is the behaviors of all the units.
 		/// </summary>
 		public enum UnitBehaviors
 		{
-			IDLE,
-			HARVESTURANIUM,
-			HARVESTSTONE,
-			HARVESTIRON,
-			HARVESTGOLD,
-			BUILDHARVESTER,
-			BUILDHQ
+			Idle,
+			HarvestUranium,
+			HarvestStone,
+			HarvestIron,
+			HarvestGold,
+			HarvestAsteroids,
+			BuildHarvester,
+			BuildHQ,
+			BuildFighter,
+			BuildRepair
 		}
 		/// <summary>
 		/// This is the different types of units.
 		/// </summary>
 		public enum UnitTypes
 		{
-			BLUEHARVESTER,
-			BLUEFIGHTER,
-			BLUEREPAIR,
-			BLUEHQ,
-			REDHARVESTER,
-			REDFIGHTER,
-			REDREPAIR,
-			REDHQ
+			BlueHarvester,
+			BlueFighter,
+			BlueRepair,
+			BlueHQ,
+			RedHarvester,
+			RedFighter,
+			RedRepair,
+			RedHQ
 		}
 		/// <summary>
 		/// These are the different types of resources
 		/// </summary>
 		public enum ResourceTypes
 		{
-			ASTEROID,
-			URANIUM,
-			STONE,
-			IRON,
-			GOLD
+			Asteroid,
+			Uranium,
+			Stone,
+			Iron,
+			Gold
 		}
 
 		/// <summary>
 		/// The time to build an harvester.
 		/// </sumamry>
-		public int BuildHarvesterTime = 3000;
+		public static int BuildHarvesterTime = 3000;
 		/// <summary>
 		/// The time it takes to build a HQ.
 		/// </summary>
-		public int BuildHQTime = 30000;
+		public static int BuildHQTime = 30000;
 		/// <summary>
 		/// The time it takes to build a fighter.
 		/// </summary>
-		public int BuildFighterTime = 3500;
+		public static int BuildFighterTime = 3500;
 		/// <summary>
 		/// The time it takes to build a repair ship.
 		/// </summary>
-		public int BuildRepairTime = 4000;
+		public static int BuildRepairTime = 4000;
 
 		/// <summary>
 		/// To flip the X and Y axis' of an array.

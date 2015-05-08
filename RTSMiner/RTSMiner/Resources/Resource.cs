@@ -19,7 +19,7 @@ namespace RTSMiner.Resources
 		public int MainHP
 		{
 			get;
-			protected set;
+			set;
 		}
 		public bool Breakable
 		{
@@ -137,7 +137,7 @@ namespace RTSMiner.Resources
 
 		public bool IsAResorceAboveMe()
 		{
-			foreach(Resource r in ResourceList)
+			foreach (Resource r in ResourceList)
 			{
 				if (r.Position.Y == Position.Y - GridSize && r.Position.X == Position.X || Position.Y == 0)
 				{

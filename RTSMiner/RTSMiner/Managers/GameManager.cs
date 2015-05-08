@@ -12,11 +12,12 @@ using VoidEngine.VGUI;
 using VoidEngine.VGame;
 using VoidEngine.Helpers;
 using VoidEngine.VGenerator;
+using VoidEngine.Particles;
 using RTSMiner.GUI;
 using RTSMiner.Helpers;
 using RTSMiner.Other;
-using RTSMiner.Particles;
 using RTSMiner.Resources;
+using RTSMiner.Units;
 
 namespace RTSMiner.Managers
 {
@@ -75,6 +76,9 @@ namespace RTSMiner.Managers
 		/// The heavyMetal background textures.
 		/// </summary>
 		public Texture2D backgroundHeavy;
+		public Texture2D hqTexture;
+		public Texture2D hqOverlayTexture;
+		public Texture2D harvesterTexture;
 		#endregion
 
 		#region Tile Stuff
@@ -95,10 +99,56 @@ namespace RTSMiner.Managers
 		/// </summary>
 		public List<Tile> BoundryTiles = new List<Tile>();
 		#endregion
-		
-		#region Player Stuff
+
+		#region Unit Stuff
+		public List<Unit> UnitList = new List<Unit>();
+		public int SelectedResource
+		{
+			get;
+			set;
+		}
+		public int SelectedUnit
+		{
+			get;
+			set;
+		}
+		public bool HarvesterPlaced
+		{
+			get;
+			set;
+		}
+		public bool HQPlaced
+		{
+			get;
+			set;
+		}
+		public int UraniumStored
+		{
+			get;
+			set;
+		}
+		public int StoneStored
+		{
+			get;
+			set;
+		}
+		public int IronStored
+		{
+			get;
+			set;
+		}
+		public int GoldStored
+		{
+			get;
+			set;
+		}
+		public int AsteroidsStored
+		{
+			get;
+			set;
+		}
 		#endregion
-		
+
 		#region Level & Transition Stuff
 		/// <summary>
 		/// The parallax for whatever it's used for?
@@ -171,10 +221,10 @@ namespace RTSMiner.Managers
 			// Create the camera.
 			camera = new Camera(GraphicsDevice.Viewport, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), 1.0f);
 			camera.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2); // Set the camera's position to Zero.
-			
+
 			base.LoadContent();
 		}
-		
+
 		protected virtual void LoadImages()
 		{
 			voidTile = Game.Content.Load<Texture2D>(@"images\tilesets\void");
@@ -185,6 +235,9 @@ namespace RTSMiner.Managers
 			ironTile = Game.Content.Load<Texture2D>(@"images\tilesets\iron");
 			goldTile = Game.Content.Load<Texture2D>(@"images\tilesets\gold");
 			backgroundHeavy = Game.Content.Load<Texture2D>(@"images\gui\backgroundHeavy");
+			hqTexture = Game.Content.Load<Texture2D>(@"images\buildings\hq1");
+			hqOverlayTexture = Game.Content.Load<Texture2D>(@"images\buildings\hq1-overlay");
+			harvesterTexture = Game.Content.Load<Texture2D>(@"images\units\harvester1");
 		}
 
 		/// <summary>
@@ -196,7 +249,7 @@ namespace RTSMiner.Managers
 			// Get the states of the keyboard and mouse.
 			keyboardState = Keyboard.GetState();
 			mouseState = Mouse.GetState();
-										  
+
 			myGame.cursor.Update(gameTime);
 
 			// The thickness of the border around the edges of the screen
@@ -271,7 +324,7 @@ namespace RTSMiner.Managers
 			{
 				myGame.SetCurrentLevel(Game1.GameLevels.MENU);
 			}
-			
+
 			foreach (Tile t in TileList)
 			{
 				// Update all tiles.
@@ -296,11 +349,35 @@ namespace RTSMiner.Managers
 				t.Update(gameTime);
 			}
 
+			for (int i = 0; i < UnitList.Count; i++)
+			{
+				if (UnitList[i].IsDead)
+				{
+					UnitList.RemoveAt(i);
+					i--;
+				}
+				else
+				{
+					if (UnitList[i].IsUnitClicked() && SelectedUnit != i)
+					{
+						SelectedUnit = i;
+						SelectedResource = -1;
+						//SetUnitButtons(i);
+					}
+					UnitList[i].Update(gameTime);
+				}
+			}
+
 			// Tell if the letter 'U' is pressed so we can regenerate the starmap.
 			if (keyboardState.IsKeyUp(Keys.U) && previousKeyboardState.IsKeyDown(Keys.U))
 			{
 				TileList.RemoveRange(0, TileList.Count);
 				ResourceList.RemoveRange(0, ResourceList.Count);
+				UnitList.RemoveRange(0, UnitList.Count);
+				HarvesterPlaced = false;
+				HQPlaced = false;
+				RTSMiner.Other.MapHelper.PlacedBlueHarvesters = 3;
+				RTSMiner.Other.MapHelper.PlacedBlueHQs = 1;
 				LoadMap();
 			}
 
@@ -308,15 +385,28 @@ namespace RTSMiner.Managers
 			{
 				// Update the debug label.
 				myGame.debugLabel.Update(gameTime);
+
+				myGame.debugStrings[0] = RTSMiner.Other.MapHelper.PlacedBlueHarvesters + " " + RTSMiner.Other.MapHelper.PlacedBlueHQs + " HA" + HarvesterPlaced + " HQ" + HQPlaced;
+
+				if (UnitList.Count > 0)
+				{
+					myGame.debugStrings[1] = UnitList[0].Position.X + "," + UnitList[0].Position.Y;
+				}
+				if (UnitList.Count > 1)
+				{
+					myGame.debugStrings[2] = UnitList[1].Position.X + "," + UnitList[1].Position.Y;
+				}
+
+				myGame.debugStrings[3] = camera.Position.X + "," + camera.Position.Y;
 			}
 
 			if (myGame.isOptionsChanged > myGame.OldIsOptionsChanged)
 			{
 				camera.viewportSize = new Vector2(myGame.WindowSize.X, myGame.WindowSize.Y);
 			}
-			
+
 			base.Update(gameTime);
-			
+
 			// Set the previous mouse and keyboard states.
 			previousKeyboardState = keyboardState;
 			previousMouseState = mouseState;
@@ -325,7 +415,7 @@ namespace RTSMiner.Managers
 		protected void LoadMap()
 		{
 			// Create the map
-			MapArray = MapGenerator.SaveMap(MapGenerator.CreateMap(100, 100, 10, 0.03f), 3);
+			MapArray = RTSMiner.Other.MapHelper.SaveMap(MapGenerator.CreateMap(100, 100, 10, 0.03f), 3);
 			// Create the unit map.
 			int[,] UnitArray = Maps.Level1UnitMapGen();
 
@@ -339,46 +429,48 @@ namespace RTSMiner.Managers
 						case -1: // "Water"
 							break;
 						case 0: // "Ground" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 							break;
 						case 1: // "Cliff" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 							ResourceList.Add(new StoneResource(new Vector2(x * 30, y * 30), stoneTile, 10, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 2: // "Uranium" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 							ResourceList.Add(new UraniumResource(new Vector2(x * 30, y * 30), uraniumTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 3: // "Iron" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 							ResourceList.Add(new IronResource(new Vector2(x * 30, y * 30), ironTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 4: // "Gold" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 							ResourceList.Add(new GoldResource(new Vector2(x * 30, y * 30), goldTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 5: // "Asteroid" Tiles
-							TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+							//sTileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 							ResourceList.Add(new AsteroidResource(new Vector2(x * 30, y * 30), asteroidTile, 100, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
+						case -2:
+							UnitList.Add(new BlueHarvester(new Vector2(x * 30 + 5, y * 30 + 5), harvesterTexture, myGame));
+							HarvesterPlaced = true;
+							break;
+						case -3:
+							UnitList.Add(new BlueHQ(hqTexture, new Vector2(x * 30, y * 30), hqOverlayTexture, Color.Blue, myGame));
+							HQPlaced = true;
+							break;
 					}
+
+					TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
 				}
 			}
+
+			//UnitList.Add(new BlueHQ(hqTexture, new Vector2(100, 100), hqOverlayTexture, Color.Blue, myGame));
+			//UnitList.Add(new BlueHarvester(new Vector2(50, 100), harvesterTexture, myGame));
 
 			foreach (Resource r in ResourceList)
 			{
 				r.UpdateConnections();
-			}
-
-			for (int x = 0; x < MapArray.GetLength(0) - 1; x++)
-			{
-				for (int y = 0; y < MapArray.GetLength(1) - 1; y++)
-				{
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30 + 30, 0), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(MapArray.GetLength(0) * 30 - 30, y * 30 + 30), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(x * 30, MapArray.GetLength(1) * 30 - 30), MapArray, -1, Color.White));
-					//BoundryTiles.Add(new Tile(voidTile, new Vector2(0, y * 30), MapArray, -1, Color.White));
-				}
 			}
 		}
 
@@ -419,6 +511,12 @@ namespace RTSMiner.Managers
 					// Draw the boundry tiles.
 					t.Draw(gameTime, spriteBatch);
 				}
+
+				foreach (Unit u in UnitList)
+				{
+					// Draw all of the Units.
+					u.Draw(gameTime, spriteBatch);
+				}
 			}
 			spriteBatch.End();
 
@@ -435,7 +533,7 @@ namespace RTSMiner.Managers
 				}
 			}
 			spriteBatch.End();
-			
+
 			base.Draw(gameTime);
 		}
 	}

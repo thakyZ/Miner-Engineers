@@ -71,7 +71,8 @@ namespace VoidEngine.VGUI
 			label = new Label(new Vector2(position.X + ((animationSetList[0].frameSize.X - font.MeasureString(text).X) / 2), position.Y + ((animationSetList[0].frameSize.Y - font.MeasureString(text).Y) / 2)), font, scale, fontColor, text);
 		}
 
-		public Button(Texture2D texture, Vector2 position, SpriteFont font, float scale, Color fontColor, string text, Color buttonColor) : base(position, buttonColor, texture)
+		public Button(Texture2D texture, Vector2 position, SpriteFont font, float scale, Color fontColor, string text, Color buttonColor)
+			: base(position, buttonColor, texture)
 		{
 			Color = buttonColor;
 			AddAnimations(texture);

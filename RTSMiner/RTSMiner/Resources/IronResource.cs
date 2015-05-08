@@ -21,7 +21,7 @@ namespace RTSMiner.Resources
 		{
 			GridSize = 30;
 			AddAnimations(texture);
-			ResourceType = RTSHelper.ResourceTypes.IRON;
+			ResourceType = RTSHelper.ResourceTypes.Iron;
 			MainHP = hp;
 			Breakable = true;
 		}

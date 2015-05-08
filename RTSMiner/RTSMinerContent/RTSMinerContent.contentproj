@@ -41,9 +41,7 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="images\buildings\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="images\tilesets\asteroids.png">
       <Name>asteroids</Name>
@@ -148,6 +146,20 @@
   <ItemGroup>
     <Compile Include="images\gui\button2.png">
       <Name>button2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="images\buildings\hq1.png">
+      <Name>hq1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="images\buildings\hq1-overlay.png">
+      <Name>hq1-overlay</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
