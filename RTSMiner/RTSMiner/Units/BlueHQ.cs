@@ -18,12 +18,22 @@ namespace RTSMiner.Units
 {
 	public class BlueHQ : Unit
 	{
+		Game1 myGame;
+
+		Texture2D overlayTexture;
+		Color overlayColor;
+
 		public BlueHQ(Texture2D texture, Vector2 position, Texture2D overlayTexture, Color overlayColor, Game1 myGame)
 			: base(position, myGame)
 		{
 
 			currentBehaviors = Helpers.RTSHelper.UnitBehaviors.Idle;
 			UnitType = Helpers.RTSHelper.UnitTypes.BlueHQ;
+
+			this.myGame = myGame;
+
+			this.overlayColor = overlayColor;
+			this.overlayTexture = overlayTexture;
 
 			UnitName = "Blue HQ";
 			MainHP = HPMax = 100;
@@ -39,6 +49,8 @@ namespace RTSMiner.Units
 		public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
 			base.Draw(gameTime, spriteBatch);
+
+			spriteBatch.Draw(overlayTexture, new Vector2(position.X, position.Y), overlayColor);
 		}
 
 		protected override void AddAnimations(Texture2D texture)

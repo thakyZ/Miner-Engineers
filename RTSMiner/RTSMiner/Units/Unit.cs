@@ -27,9 +27,14 @@ namespace RTSMiner.Units
 		Texture2D overlayTexture = null;
 		Color overlayColor;
 
+		Vector2 BuildingLocation = new Vector2();
+		Vector2 TempBuildingLocation = new Vector2();
+
 		protected static Texture2D tempTexture = null;
 
 		protected MouseState mouseState, previousMouseState;
+
+		bool okToPlace = false;
 
 		#region Variables
 		#region Enums
@@ -158,6 +163,18 @@ namespace RTSMiner.Units
 
 		public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
+			if (TempBuildingLocation != new Vector2())
+			{
+				if (okToPlace)
+				{
+					spriteBatch.Draw(overlayTexture, new Rectangle((int)position.X, (int)position.Y, overlayTexture.Width, overlayTexture.Height), new Color(255, 255, 255, 192));
+				}
+				else
+				{
+					spriteBatch.Draw(overlayTexture, new Rectangle((int)position.X, (int)position.Y, overlayTexture.Width, overlayTexture.Height), new Color(255, 192, 192, 192));
+				}
+			}
+
 			base.Draw(gameTime, spriteBatch);
 
 			if (isOverlay)
@@ -303,7 +320,7 @@ namespace RTSMiner.Units
 		{
 			LockUnit = true;
 			BuildTime += gameTime.ElapsedGameTime.Milliseconds;
-			float offsetAngle = (float)(myGame.gameManager.random.NextDouble() * Math.PI * 2);
+			float offsetAngle = (float)(myGame.gameManager.Random.NextDouble() * Math.PI * 2);
 			Vector2 offsetVector = new Vector2((float)Math.Cos(offsetAngle), (float)Math.Sin(offsetAngle));
 
 			switch (unit)
@@ -313,12 +330,56 @@ namespace RTSMiner.Units
 					{
 						BuildTime = 0;
 						offsetVector = offsetVector * (BlueHarvester.UnitRadius + CurrentAnimation.frameSize.X / 2) + new Vector2(-BlueHarvester.UnitRadius, -BlueHarvester.UnitRadius);
-						myGame.gameManager.UnitList.Add(new BlueHarvester(new Vector2(BoundingCollisions.Center.X, BoundingCollisions.Center.Y) + offsetVector, myGame.gameManager.harvesterTexture, myGame));
+						myGame.gameManager.UnitList.Add(new BlueHarvester(new Vector2(BoundingCollisions.Center.X, BoundingCollisions.Center.Y) + offsetVector, myGame.gameManager.HarvesterTexture, myGame));
 						currentBehaviors = RTSHelper.UnitBehaviors.Idle;
 					}
 					//progressBar.SetValue(BuildTime);
 					//progressBar.SetMaxValue(BuildTime);
 					break;
+			}
+		}
+
+		public void BuildBuilding(RTSHelper.UnitTypes unit, GameTime gameTime)
+		{
+			LockUnit = true;
+			Point UnitSize = Point.Zero;
+			Vector2 centerOffset = Vector2.Zero;
+			switch (unit)
+			{
+				case RTSHelper.UnitTypes.BlueHQ:
+					UnitSize = new Point(3, 3);
+					centerOffset = new Vector2(45, 45);
+					if (BuildTime >= RTSHelper.BuildHQTime)
+					{
+						myGame.gameManager.UnitList.Add(new BlueHQ(myGame.gameManager.HQTexture, BuildingLocation, myGame.gameManager.HQOverlayTexture, Color.Blue, myGame));
+						BuildTime = 0;
+						BuildingLocation = new Vector2();
+						TempBuildingLocation = new Vector2();
+						currentBehaviors = RTSHelper.UnitBehaviors.Idle;
+					}
+					break;
+			}
+
+			Point TempPoint = new Point((int)(myGame.cursor.Position.X / 30), (int)(myGame.cursor.Position.Y / 30));
+			if (BuildingLocation == new Vector2() && currentBehaviors != RTSHelper.UnitBehaviors.Idle)
+			{
+				for (int i = TempPoint.X; i < TempPoint.X + UnitSize.X; i++)
+				{
+					for (int j = TempPoint.Y; j < TempPoint.Y + UnitSize.Y; j++)
+					{
+						if (myGame.cursor.Position.X > 0 && myGame.cursor.Position.X < myGame.gameManager.MapArray.GetLength(0) * 30 && myGame.cursor.Position.Y > 0 && myGame.cursor.Position.Y < myGame.gameManager.MapArray.GetLength(1) * 30)
+						{
+							if (myGame.gameManager.MapArray[i, j] != 0)
+							{
+								okToPlace = true;
+							}
+						}
+						else
+						{
+							okToPlace = false;
+						}
+					}
+				}
 			}
 		}
 	}

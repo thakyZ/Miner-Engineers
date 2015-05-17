@@ -8,10 +8,12 @@ namespace RTSMiner.Other
 {
 	public class MapHelper
 	{
-		public static int PlacedBlueHarvesters = 3;
+		protected static Random rng = new Random();
+
+		public static int PlacedBlueHarvesters = 1;
 		public static int PlacedBlueFighters = 0;
 		public static int PlacedBlueRepairs = 0;
-		public static int PlacedBlueHQs = 1;
+		public static int PlacedBlueHQs = 0;
 
 		public static int PlacedRedHarvesters = 0;
 		public static int PlacedRedFighters = 0;
@@ -76,38 +78,36 @@ namespace RTSMiner.Other
 					{
 						mapArray[x, y] = 0;
 					}
+				}
+			}
 
-					if (PlacedBlueHarvesters > 0)
-					{
-						Point harvesterPlacement = new Point(x + 1, y + 1);
+			for (int i = 0; i < PlacedBlueHarvesters; i++)
+			{
+				Point harvesterPlacement = new Point(rng.Next(99), rng.Next(99));
 
-						if (CheckAreaAround(mapArray, harvesterPlacement, HarvesterSize, 0))
-						{
-							mapArray[(int)harvesterPlacement.X, (int)harvesterPlacement.Y] = -2;
-							PlacedBlueHarvesters--;
-						}
+				if (CheckAreaAround(mapArray, harvesterPlacement, HarvesterSize, 0))
+				{
+					mapArray[(int)harvesterPlacement.X, (int)harvesterPlacement.Y] = -2;
+					PlacedBlueHarvesters--;
+				}
+				else
+				{
+					i--;
+				}
+			}
 
-						if (mapArray[(int)harvesterPlacement.X, (int)harvesterPlacement.Y] != -2)
-						{
-							PlacedBlueHarvesters += 1;
-						}
-					}
+			for (int i = 0; i < PlacedBlueHQs; i++)
+			{
+				Point basePlacement = new Point(rng.Next(96), rng.Next(96));
 
-					if (PlacedBlueHQs > 0)
-					{
-						Point basePlacement = new Point(x + 1, y + 1);
-
-						if (CheckAreaAround(mapArray, basePlacement, HQSize, 0))
-						{
-							mapArray[(int)basePlacement.X, (int)basePlacement.Y] = -3;
-							PlacedBlueHQs--;
-						}
-
-						if (CheckAreaAround(mapArray, basePlacement, HQSize, 0) && mapArray[(int)basePlacement.X, (int)basePlacement.Y] != -2)
-						{
-							PlacedBlueHQs += 1;
-						}
-					}
+				if (CheckAreaAround(mapArray, basePlacement, HQSize, 0))
+				{
+					mapArray[(int)basePlacement.X, (int)basePlacement.Y] = -3;
+					PlacedBlueHQs--;
+				}
+				else
+				{
+					i--;
 				}
 			}
 
@@ -116,20 +116,25 @@ namespace RTSMiner.Other
 
 		public static bool CheckAreaAround(int[,] mapArray, Point Placement, Point Range, int CheckedSpot)
 		{
-			int successes = 0;
+			int check = 0;
 
-			for (int i = 0; i < Range.X; i++)
+			for (int i = Placement.X; i < Placement.X + Range.X; i++)
 			{
-				for (int j = 0; j < Range.Y; j++)
+				for (int j = Placement.Y; j < Placement.Y + Range.Y; j++)
 				{
-					if (mapArray[(int)MathHelper.Clamp(Placement.X + i, 0, mapArray.GetLength(1) - Range.X), (int)MathHelper.Clamp(Placement.Y + j, 0, mapArray.GetLength(0) - Range.Y)] == CheckedSpot)
+					if (mapArray[i, j] == 0)
 					{
-						successes += 1;
+						check += 1;
 					}
 				}
 			}
 
-			return successes >= Range.X * Range.Y;
+			if (check == Range.X * Range.Y)
+			{
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

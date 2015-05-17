@@ -110,6 +110,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\BuildHarvesterButton.cs" />
+    <Compile Include="GUI\HavestUraniumButton.cs" />
     <Compile Include="Other\MapHelper.cs" />
     <Compile Include="Units\BlueHarvester.cs" />
     <Compile Include="Units\BlueHQ.cs" />

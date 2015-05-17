@@ -206,6 +206,8 @@ namespace RTSMiner
 				debugLabel = new Label(new Vector2(0, 0), segoeUIMonoDebug, 1.0f, Color.White, "");
 			}
 
+			OptionsComfirmed = true;
+
 			// TODO: use this.Content to load your game content here
 			SetCurrentLevel(GameLevels.MENU);
 		}

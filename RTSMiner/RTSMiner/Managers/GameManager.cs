@@ -38,47 +38,47 @@ namespace RTSMiner.Managers
 		/// <summary>
 		/// Used to control the game's screen.
 		/// </summary>
-		public Camera camera;
+		public Camera Camera;
 
 		/// <summary>
 		/// Used to get random real numbers.
 		/// </summary>
-		public Random random = new Random();
+		public Random Random = new Random();
 
 		/// <summary>
 		/// Used to get the current state of the keyboard.
 		/// </summary>
-		public KeyboardState keyboardState, previousKeyboardState;
+		public KeyboardState KeyboardState, PreviousKeyboardState;
 
 		/// <summary>
 		/// Used to control the state of the cursor.
 		/// </summary>
-		public MouseState mouseState, previousMouseState;
+		public MouseState MouseState, PreviousMouseState;
 
 		#region Textures
 		/// <summary>
 		/// The textures for the resources.
 		/// </summary>
-		public Texture2D stoneTile, uraniumTile, ironTile, goldTile;
+		public Texture2D StoneTileTexture, UraniumTileTexture, IronTileTexture, GoldTileTexture;
 		/// <summary>
 		/// The textures for the boundries of the map.
 		/// </summary>
-		public Texture2D voidTile, spaceTile, asteroidTile;
+		public Texture2D VoidTileTexture, SpaceTileTexture, AsteroidTileTexture;
 		/// <summary>
 		/// The texture of the buttons on the screen.
 		/// </summary>
-		public Texture2D buttonTexture, buttonWindowTexture, progressBarTexture;
+		public Texture2D ButtonTexture, ButtonWindowTexture, ProgressBarTexture;
 		/// <summary>
 		/// The texture of the particles on the screen.
 		/// </summary>
-		public Texture2D particalTexture;
+		public Texture2D ParticalTexture;
 		/// <summary>
 		/// The heavyMetal background textures.
 		/// </summary>
-		public Texture2D backgroundHeavy;
-		public Texture2D hqTexture;
-		public Texture2D hqOverlayTexture;
-		public Texture2D harvesterTexture;
+		public Texture2D BackgroundHeavyTexture;
+		public Texture2D HQTexture;
+		public Texture2D HQOverlayTexture;
+		public Texture2D HarvesterTexture;
 		#endregion
 
 		#region Tile Stuff
@@ -154,6 +154,11 @@ namespace RTSMiner.Managers
 		/// The parallax for whatever it's used for?
 		/// </summary>
 		Vector2 Parallax = Vector2.One;
+		public bool MapLoaded
+		{
+			get;
+			set;
+		}
 		#endregion
 
 		#region Partical System
@@ -177,6 +182,10 @@ namespace RTSMiner.Managers
 			get;
 			set;
 		}
+		#endregion
+
+		#region GUI Stuff
+		public List<Button> ButtonList = new List<Button>();
 		#endregion
 
 		/// <summary>
@@ -213,31 +222,28 @@ namespace RTSMiner.Managers
 			spriteBatch = new SpriteBatch(myGame.GraphicsDevice);
 			// Load all the images.
 			LoadImages();
-			// Loads the map once.
-			LoadMap();
 			// Load the background.
 			myGame.GenerateBackground();
 
 			// Create the camera.
-			camera = new Camera(GraphicsDevice.Viewport, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), 1.0f);
-			camera.Position = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2); // Set the camera's position to Zero.
+			Camera = new Camera(myGame.GraphicsDevice.Viewport, new Point(myGame.WindowSize.X, myGame.WindowSize.Y), 1.0f);
 
 			base.LoadContent();
 		}
 
 		protected virtual void LoadImages()
 		{
-			voidTile = Game.Content.Load<Texture2D>(@"images\tilesets\void");
-			spaceTile = Game.Content.Load<Texture2D>(@"images\tilesets\space");
-			asteroidTile = Game.Content.Load<Texture2D>(@"images\tilesets\asteroids");
-			stoneTile = Game.Content.Load<Texture2D>(@"images\tilesets\stone");
-			uraniumTile = Game.Content.Load<Texture2D>(@"images\tilesets\uranium");
-			ironTile = Game.Content.Load<Texture2D>(@"images\tilesets\iron");
-			goldTile = Game.Content.Load<Texture2D>(@"images\tilesets\gold");
-			backgroundHeavy = Game.Content.Load<Texture2D>(@"images\gui\backgroundHeavy");
-			hqTexture = Game.Content.Load<Texture2D>(@"images\buildings\hq1");
-			hqOverlayTexture = Game.Content.Load<Texture2D>(@"images\buildings\hq1-overlay");
-			harvesterTexture = Game.Content.Load<Texture2D>(@"images\units\harvester1");
+			VoidTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\void");
+			SpaceTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\space");
+			AsteroidTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\asteroids");
+			StoneTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\stone");
+			UraniumTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\uranium");
+			IronTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\iron");
+			GoldTileTexture = Game.Content.Load<Texture2D>(@"images\tilesets\gold");
+			BackgroundHeavyTexture = Game.Content.Load<Texture2D>(@"images\gui\backgroundHeavy");
+			HQTexture = Game.Content.Load<Texture2D>(@"images\buildings\hq1");
+			HQOverlayTexture = Game.Content.Load<Texture2D>(@"images\buildings\hq1-overlay");
+			HarvesterTexture = Game.Content.Load<Texture2D>(@"images\units\harvester1");
 		}
 
 		/// <summary>
@@ -247,83 +253,16 @@ namespace RTSMiner.Managers
 		public override void Update(GameTime gameTime)
 		{
 			// Get the states of the keyboard and mouse.
-			keyboardState = Keyboard.GetState();
-			mouseState = Mouse.GetState();
+			KeyboardState = Keyboard.GetState();
+			MouseState = Mouse.GetState();
 
-			myGame.cursor.Update(gameTime);
-
-			// The thickness of the border around the edges of the screen
-			// to move the camera.
-			int MoveRadius = 20;
-			// The speed to move the camera at.
-			int MoveSpeed = 5;
-
-			#region Camera Controls
-			// Move the camera up.
-			if (keyboardState.IsKeyDown(Keys.Up))
-			{
-				camera.Position -= new Vector2(0, 5);
-			}
-			// Move the camera to the left.
-			if (keyboardState.IsKeyDown(Keys.Left))
-			{
-				camera.Position -= new Vector2(5, 0);
-			}
-			// Reset the camera.
-			if (keyboardState.IsKeyDown(Keys.NumPad5))
-			{
-				camera.Zoom = 1f;
-				camera.RotationX = 0;
-				camera.RotationY = 0;
-				camera.RotationZ = 0;
-				camera.Position = new Vector2(0, 0);
-			}
-			// Move the camera to the right.
-			if (keyboardState.IsKeyDown(Keys.Right))
-			{
-				camera.Position += new Vector2(5, 0);
-			}
-			// Move the camera down.
-			if (keyboardState.IsKeyDown(Keys.Down))
-			{
-				camera.Position += new Vector2(0, 5);
-			}
-			#endregion
-
-			// Move the camera if the mouse is at a specific area.
-			if (Game.IsActive)
-			{
-				if (mouseState.X > 0 && mouseState.X < myGame.WindowSize.X && mouseState.Y > 0 && mouseState.Y < myGame.WindowSize.Y)
-				{
-					// Move the camera down.
-					if (mouseState.Y + MoveRadius >= myGame.WindowSize.Y)
-					{
-						camera.Position += new Vector2(0, MoveSpeed);
-					}
-					// Move the camera up.
-					if (mouseState.Y <= MoveRadius)
-					{
-						camera.Position -= new Vector2(0, MoveSpeed);
-					}
-					// Move the camera to the right.
-					if (mouseState.X + MoveRadius >= myGame.WindowSize.X)
-					{
-						camera.Position += new Vector2(MoveSpeed, 0);
-					}
-					// Move the camera to the left.
-					if (mouseState.X <= MoveRadius)
-					{
-						camera.Position -= new Vector2(MoveSpeed, 0);
-					}
-				}
-			}
-
-			camera.Position += new Vector2(0, 0);
-
-			if (keyboardState.IsKeyDown(Keys.Escape))
+			if (KeyboardState.IsKeyDown(Keys.Escape))
 			{
 				myGame.SetCurrentLevel(Game1.GameLevels.MENU);
 			}
+
+			#region Update Tiles and Objects
+			myGame.cursor.Update(gameTime);
 
 			foreach (Tile t in TileList)
 			{
@@ -364,52 +303,138 @@ namespace RTSMiner.Managers
 						SelectedResource = -1;
 						//SetUnitButtons(i);
 					}
+
 					UnitList[i].Update(gameTime);
 				}
 			}
+			#endregion
 
-			// Tell if the letter 'U' is pressed so we can regenerate the starmap.
-			if (keyboardState.IsKeyUp(Keys.U) && previousKeyboardState.IsKeyDown(Keys.U))
+			#region Camera Controls
+			float MoveSpeed = 5;
+			float MoveRadius = 10;
+
+			// Move the camera up.
+			if (KeyboardState.IsKeyDown(Keys.Up))
 			{
-				TileList.RemoveRange(0, TileList.Count);
-				ResourceList.RemoveRange(0, ResourceList.Count);
-				UnitList.RemoveRange(0, UnitList.Count);
-				HarvesterPlaced = false;
-				HQPlaced = false;
-				RTSMiner.Other.MapHelper.PlacedBlueHarvesters = 3;
-				RTSMiner.Other.MapHelper.PlacedBlueHQs = 1;
-				LoadMap();
+				Camera.Position -= new Vector2(0, 5);
+			}
+			// Move the camera to the left.
+			if (KeyboardState.IsKeyDown(Keys.Left))
+			{
+				Camera.Position -= new Vector2(5, 0);
+			}
+			// Reset the camera.
+			if (KeyboardState.IsKeyDown(Keys.NumPad5))
+			{
+				Camera.Position = new Vector2(0, 0);
+			}
+			// Move the camera to the right.
+			if (KeyboardState.IsKeyDown(Keys.Right))
+			{
+				Camera.Position += new Vector2(5, 0);
+			}
+			// Move the camera down.
+			if (KeyboardState.IsKeyDown(Keys.Down))
+			{
+				Camera.Position += new Vector2(0, 5);
 			}
 
+			Camera.Position += new Vector2(0, 0);
+
+			// Move the camera if the mouse is at a specific area.
+			if (Game.IsActive)
+			{
+				if (MouseState.X > 0 && MouseState.X < myGame.WindowSize.X && MouseState.Y > 0 && MouseState.Y < myGame.WindowSize.Y)
+				{
+					// Move the camera down.
+					if (MouseState.Y + MoveRadius >= myGame.WindowSize.Y)
+					{
+						Camera.Position += new Vector2(0, MoveSpeed);
+					}
+					// Move the camera up.
+					if (MouseState.Y <= MoveRadius)
+					{
+						Camera.Position -= new Vector2(0, MoveSpeed);
+					}
+					// Move the camera to the right.
+					if (MouseState.X + MoveRadius >= myGame.WindowSize.X)
+					{
+						Camera.Position += new Vector2(MoveSpeed, 0);
+					}
+					// Move the camera to the left.
+					if (MouseState.X <= MoveRadius)
+					{
+						Camera.Position -= new Vector2(MoveSpeed, 0);
+					}
+				}
+			}
+			#endregion
+
+			#region Map Loading Stuff
+			if (!MapLoaded)
+			{
+				RenegerateMap();
+			}
+
+			// Tell if the letter 'U' is pressed so we can regenerate the starmap.
+			if (KeyboardState.IsKeyUp(Keys.U) && PreviousKeyboardState.IsKeyDown(Keys.U))
+			{
+				RenegerateMap();
+			}
+			#endregion
+
+			#region Debug Stuff
 			if (myGame.GameDebug)
 			{
 				// Update the debug label.
 				myGame.debugLabel.Update(gameTime);
-
-				myGame.debugStrings[0] = RTSMiner.Other.MapHelper.PlacedBlueHarvesters + " " + RTSMiner.Other.MapHelper.PlacedBlueHQs + " HA" + HarvesterPlaced + " HQ" + HQPlaced;
-
-				if (UnitList.Count > 0)
-				{
-					myGame.debugStrings[1] = UnitList[0].Position.X + "," + UnitList[0].Position.Y;
-				}
-				if (UnitList.Count > 1)
-				{
-					myGame.debugStrings[2] = UnitList[1].Position.X + "," + UnitList[1].Position.Y;
-				}
-
-				myGame.debugStrings[3] = camera.Position.X + "," + camera.Position.Y;
+				myGame.debugStrings[0] = "harvesterCount=" + RTSMiner.Other.MapHelper.PlacedBlueHarvesters + " HQCount=" + RTSMiner.Other.MapHelper.PlacedBlueHQs;
+				myGame.debugStrings[1] = "cameraSize=(" + Camera.viewportSize.X + "," + Camera.viewportSize.Y + ")";
+				myGame.debugStrings[2] = "windowSize=(" + myGame.WindowSize.X + "," + myGame.WindowSize.Y + ")";
+				myGame.debugStrings[3] = "cameraPosi=(" + Camera.Position.X + "," + Camera.Position.Y + ")";
 			}
 
 			if (myGame.isOptionsChanged > myGame.OldIsOptionsChanged)
 			{
-				camera.viewportSize = new Vector2(myGame.WindowSize.X, myGame.WindowSize.Y);
+				Camera.viewportSize = new Vector2(myGame.WindowSize.X, myGame.WindowSize.Y);
 			}
+			#endregion
 
 			base.Update(gameTime);
 
 			// Set the previous mouse and keyboard states.
-			previousKeyboardState = keyboardState;
-			previousMouseState = mouseState;
+			PreviousKeyboardState = KeyboardState;
+			PreviousMouseState = MouseState;
+		}
+
+		#region Load the map
+		protected void RenegerateMap()
+		{
+			TileList.RemoveRange(0, TileList.Count);
+			ResourceList.RemoveRange(0, ResourceList.Count);
+			UnitList.RemoveRange(0, UnitList.Count);
+			HarvesterPlaced = false;
+			HQPlaced = false;
+			RTSMiner.Other.MapHelper.PlacedBlueHarvesters = 1;
+			RTSMiner.Other.MapHelper.PlacedBlueHQs = 0;
+			// Loads the map once.
+			LoadMap();
+
+			Camera.Size = new Point(MapArray.GetLength(1) * 30, MapArray.GetLength(0) * 30);
+			Camera.screenCenter = new Vector2(myGame.GraphicsDevice.Viewport.Width, myGame.GraphicsDevice.Viewport.Height);
+			Camera.origin = Camera.screenCenter / Camera.Zoom;
+
+			foreach (Unit u in UnitList)
+			{
+				if (u is BlueHarvester)
+				{
+					Camera.Position = u.Position;
+				}
+			}
+
+			Camera.Position += new Vector2(0, 0);
+
+			MapLoaded = true;
 		}
 
 		protected void LoadMap()
@@ -426,53 +451,41 @@ namespace RTSMiner.Managers
 				{
 					switch (MapArray[x, y])
 					{
-						case -1: // "Water"
-							break;
-						case 0: // "Ground" Tiles
-							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							break;
 						case 1: // "Cliff" Tiles
-							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new StoneResource(new Vector2(x * 30, y * 30), stoneTile, 10, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							ResourceList.Add(new StoneResource(new Vector2(x * 30, y * 30), StoneTileTexture, 10, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 2: // "Uranium" Tiles
-							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new UraniumResource(new Vector2(x * 30, y * 30), uraniumTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							ResourceList.Add(new UraniumResource(new Vector2(x * 30, y * 30), UraniumTileTexture, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 3: // "Iron" Tiles
-							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new IronResource(new Vector2(x * 30, y * 30), ironTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							ResourceList.Add(new IronResource(new Vector2(x * 30, y * 30), IronTileTexture, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 4: // "Gold" Tiles
-							//TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new GoldResource(new Vector2(x * 30, y * 30), goldTile, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							ResourceList.Add(new GoldResource(new Vector2(x * 30, y * 30), GoldTileTexture, 15, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case 5: // "Asteroid" Tiles
-							//sTileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
-							ResourceList.Add(new AsteroidResource(new Vector2(x * 30, y * 30), asteroidTile, 100, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
+							ResourceList.Add(new AsteroidResource(new Vector2(x * 30, y * 30), AsteroidTileTexture, 100, new Point(MapArray.GetLength(0) * 30, MapArray.GetLength(1) * 30), ResourceList));
 							break;
 						case -2:
-							UnitList.Add(new BlueHarvester(new Vector2(x * 30 + 5, y * 30 + 5), harvesterTexture, myGame));
+							UnitList.Add(new BlueHarvester(new Vector2(x * 30 + 5, y * 30 + 5), HarvesterTexture, myGame));
 							HarvesterPlaced = true;
 							break;
 						case -3:
-							UnitList.Add(new BlueHQ(hqTexture, new Vector2(x * 30, y * 30), hqOverlayTexture, Color.Blue, myGame));
+							UnitList.Add(new BlueHQ(HQTexture, new Vector2(x * 30, y * 30), HQOverlayTexture, new Color(0, 124, 255), myGame));
 							HQPlaced = true;
 							break;
 					}
 
-					TileList.Add(new Tile(spaceTile, new Vector2(x * 30, y * 30), 0, random.Next(998524), Color.White));
+					TileList.Add(new Tile(SpaceTileTexture, new Vector2(x * 30, y * 30), 0, Random.Next(998524), Color.White));
 				}
 			}
-
-			//UnitList.Add(new BlueHQ(hqTexture, new Vector2(100, 100), hqOverlayTexture, Color.Blue, myGame));
-			//UnitList.Add(new BlueHarvester(new Vector2(50, 100), harvesterTexture, myGame));
 
 			foreach (Resource r in ResourceList)
 			{
 				r.UpdateConnections();
 			}
 		}
+		#endregion
 
 		/// <summary>
 		/// Draws the game component's content.
@@ -480,6 +493,7 @@ namespace RTSMiner.Managers
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		public override void Draw(GameTime gameTime)
 		{
+			#region Draw Background
 			// Draw the back stage.
 			spriteBatch.Begin();
 			{
@@ -490,36 +504,52 @@ namespace RTSMiner.Managers
 				}
 			}
 			spriteBatch.End();
+			#endregion
 
+			#region Draw everything in the camera
 			// Draw in the frame of the camera.
-			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, camera.GetTransformation());
+			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Camera.GetTransformation());
 			{
 				foreach (Tile t in TileList)
 				{
-					// Draw all the tiles.
-					t.Draw(gameTime, spriteBatch);
+					if (Camera.IsInView(t.Position, new Vector2(30, 30)))
+					{
+						// Draw all the tiles.
+						t.Draw(gameTime, spriteBatch);
+					}
 				}
 
 				foreach (Resource r in ResourceList)
 				{
-					// Draw all the resources.
-					r.Draw(gameTime, spriteBatch);
+					if (Camera.IsInView(r.Position, new Vector2(30, 30)))
+					{
+						// Draw all the resources.
+						r.Draw(gameTime, spriteBatch);
+					}
 				}
 
 				foreach (Tile t in BoundryTiles)
 				{
-					// Draw the boundry tiles.
-					t.Draw(gameTime, spriteBatch);
+					if (Camera.IsInView(t.Position, new Vector2(30, 30)))
+					{
+						// Draw the boundry tiles.
+						t.Draw(gameTime, spriteBatch);
+					}
 				}
 
 				foreach (Unit u in UnitList)
 				{
-					// Draw all of the Units.
-					u.Draw(gameTime, spriteBatch);
+					if (Camera.IsInView(u.Position, new Vector2(u.CurrentAnimation.frameSize.X, u.CurrentAnimation.frameSize.Y)))
+					{
+						// Draw all of the Units.
+						u.Draw(gameTime, spriteBatch);
+					}
 				}
 			}
 			spriteBatch.End();
+			#endregion
 
+			#region Draw Cursor and debug stuff
 			// Draw outside the frame of the camera.
 			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null);
 			{
@@ -533,6 +563,7 @@ namespace RTSMiner.Managers
 				}
 			}
 			spriteBatch.End();
+			#endregion
 
 			base.Draw(gameTime);
 		}
